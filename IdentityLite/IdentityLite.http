@@ -1,0 +1,6 @@
+@IdentityLite_HostAddress = http://localhost:5258
+
+GET {{IdentityLite_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -6,6 +6,8 @@ dotnet add package Microsoft.EntityFrameworkCore.InMemory --version 9.0.11;
 dotnet add package Microsoft.EntityFrameworkCore.SqlServer --version 9.0.11;
 dotnet add package Microsoft.EntityFrameworkCore.Tools --version 9.0.11;
 dotnet add package Microsoft.AspNetCore.Identity.EntityFrameworkCore --version 9.0.11;
+dotnet add package Microsoft.AspNetCore.Identity.UI --version 9.0.11;
+dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer --version 9.0.11;
 dotnet add package Swashbuckle.AspNetCore --version 6.5.0;
 
 # JWT (net9.0)

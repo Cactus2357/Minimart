@@ -1,8 +1,6 @@
-using AuthenticationApi.Models;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AuthenticationApi.Controllers {
+namespace IdentityLite.Controllers {
     [ApiController]
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase {
@@ -18,7 +16,6 @@ namespace AuthenticationApi.Controllers {
         }
 
         [HttpGet(Name = "GetWeatherForecast")]
-        [Authorize]
         public IEnumerable<WeatherForecast> Get() {
             return Enumerable.Range(1, 5).Select(index => new WeatherForecast {
                 Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
