@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace IdentityLite.Models {
+namespace AuthenticationApi.Model {
     public class AuthDbContext : IdentityDbContext<IdentityUser> {
         public AuthDbContext(DbContextOptions<AuthDbContext> options) : base(options) {
         }
