@@ -1,4 +1,4 @@
-namespace AuthenticationApi {
+namespace AuthenticationApi.Models {
     public class WeatherForecast {
         public DateOnly Date { get; set; }
 

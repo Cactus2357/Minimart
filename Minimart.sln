@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36705.20 d17.14
+VisualStudioVersion = 17.14.36705.20
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MinimartApi", "MinimartApi\MinimartApi.csproj", "{11CD2610-5448-46DC-A997-CF42FE001597}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthenticationApi", "AuthenticationApi\AuthenticationApi.csproj", "{091E1DDB-E25A-455C-AB40-F0971959D361}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityLite", "IdentityLite\IdentityLite.csproj", "{078B2C17-8469-428D-8D94-05585EEEE92E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{091E1DDB-E25A-455C-AB40-F0971959D361}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{091E1DDB-E25A-455C-AB40-F0971959D361}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{091E1DDB-E25A-455C-AB40-F0971959D361}.Release|Any CPU.Build.0 = Release|Any CPU
+		{078B2C17-8469-428D-8D94-05585EEEE92E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{078B2C17-8469-428D-8D94-05585EEEE92E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{078B2C17-8469-428D-8D94-05585EEEE92E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{078B2C17-8469-428D-8D94-05585EEEE92E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
