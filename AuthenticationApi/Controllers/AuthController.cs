@@ -174,7 +174,15 @@ namespace AuthenticationApi.Controllers {
                 return BadRequest();
             }
 
-            IdentityResult result = await userManager.ConfirmEmailAsync(user, token);
+            string decodedToken = token;
+            try {
+                var decodedBytes = WebEncoders.Base64UrlDecode(token);
+                decodedToken = Encoding.UTF8.GetString(decodedBytes);
+            } catch {
+                // leave decodedToken as original token
+            }
+
+            IdentityResult result = await userManager.ConfirmEmailAsync(user, decodedToken);
             if (!result.Succeeded) {
                 return BadRequest();
             }
@@ -203,13 +211,22 @@ namespace AuthenticationApi.Controllers {
             }
 
             var confirmToken = await userManager.GenerateEmailConfirmationTokenAsync(user);
+            var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(confirmToken));
 
-            var param = new Dictionary<string, string?>() {
-                { "userId", user.Id },
-                { "token", confirmToken }
+            var param = new {
+                userId = user.Id,
+                token = confirmToken
             };
             string? confirmationUrl = Url.Action(nameof(ConfirmEmail), "Auth", param, Request.Scheme);
 
+            if (string.IsNullOrWhiteSpace(confirmationUrl)) {
+                var relative = QueryHelpers.AddQueryString("/confirmEmail", new Dictionary<string, string?> {
+                    { "userId", user.Id },
+                    { "token", encodedToken }
+                });
+                var baseUri = new Uri($"{Request.Scheme}://{Request.Host.Value}");
+                confirmationUrl = new Uri(baseUri, relative).ToString();
+            }
 
             await emailService.SendConfirmationLinkAsync(user, user.Email, confirmationUrl);
 
