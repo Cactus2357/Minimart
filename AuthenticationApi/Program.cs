@@ -1,9 +1,10 @@
 using AuthenticationApi;
 using AuthenticationApi.Authentications;
 using AuthenticationApi.Models;
-using AuthenticationApi.Service;
+using AuthenticationApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -11,8 +12,6 @@ using System.Security.Claims;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AuthDbContext>(option => {
@@ -23,31 +22,32 @@ builder.Services.AddDbContext<AuthDbContext>(option => {
     }
 });
 
-builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => {
-    options.User.RequireUniqueEmail = true;
+builder.Services
+    .AddIdentity<IdentityUser, IdentityRole>(options => {
+        options.User.RequireUniqueEmail = true;
 
-    options.Tokens.PasswordResetTokenProvider = TokenOptions.DefaultEmailProvider;
-})
-.AddEntityFrameworkStores<AuthDbContext>()
-.AddDefaultTokenProviders();
+        options.Tokens.PasswordResetTokenProvider = TokenOptions.DefaultEmailProvider;
+    })
+    .AddEntityFrameworkStores<AuthDbContext>()
+    .AddDefaultTokenProviders();
 
-builder.Services.AddAuthentication(option => {
-    option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    //option.DefaultChallengeScheme = "Bearer";
-    //option.DefaultSignInScheme = IdentityConstants.ExternalScheme;
-})
-.AddJwtBearer(options => {
-    options.TokenValidationParameters = new TokenValidationParameters {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
-    };
-});
+builder.Services
+    .AddAuthentication(option => {
+        option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        option.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options => {
+        options.TokenValidationParameters = new TokenValidationParameters {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? string.Empty))
+        };
+    });
 
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<JwtHandler>();
@@ -95,43 +95,44 @@ if (app.Environment.IsDevelopment()) {
     app.MapOpenApi();
     app.UseSwagger();
     app.UseSwaggerUI();
-    app.MapGet("/", () => Results.Redirect("/swagger/index.html"));
+    app.MapGet("/", () => Results.Redirect("/swagger/index.html"))
+        .ExcludeFromDescription();
 } else {
     app.Map("/", () => "API is running.");
 }
 
 // Seed roles and a default admin
-using (var scope = app.Services.CreateScope()) {
-    var services = scope.ServiceProvider;
-    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-    var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
+//using (var scope = app.Services.CreateScope()) {
+//    var services = scope.ServiceProvider;
+//    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+//    var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
 
-    string[] roles = { "Admin", "User" };
-    foreach (var role in roles) {
-        if (!await roleManager.RoleExistsAsync(role)) {
-            await roleManager.CreateAsync(new IdentityRole(role));
-        }
-    }
+//    string[] roles = { "Admin", "User" };
+//    foreach (var role in roles) {
+//        if (!await roleManager.RoleExistsAsync(role)) {
+//            await roleManager.CreateAsync(new IdentityRole(role));
+//        }
+//    }
 
-    // Create default admin if missing
-    var adminEmail = builder.Configuration["EmailSettings:UserName"];
-    var adminUserName = "Administrator";
-    var adminPassword = "Admin123$";
+//    // Create default admin
+//    var adminEmail = builder.Configuration["EmailSettings:UserName"];
+//    var adminUserName = "Administrator";
+//    var adminPassword = "Admin123$";
 
-    var admin = await userManager.FindByEmailAsync(adminEmail);
+//    var admin = await userManager.FindByEmailAsync(adminEmail);
 
-    if (admin == null) {
-        admin = new IdentityUser {
-            UserName = adminUserName,
-            Email = adminEmail,
-        };
+//    if (admin == null) {
+//        admin = new IdentityUser {
+//            UserName = adminUserName,
+//            Email = adminEmail,
+//        };
 
-        var create = await userManager.CreateAsync(admin, adminPassword);
-        if (create.Succeeded) {
-            await userManager.AddToRolesAsync(admin, new[] { "Admin", "User" });
-        }
-    }
-}
+//        var create = await userManager.CreateAsync(admin, adminPassword);
+//        if (create.Succeeded) {
+//            await userManager.AddToRolesAsync(admin, new[] { "Admin", "User" });
+//        }
+//    }
+//}
 
 app.UseHttpsRedirection();
 

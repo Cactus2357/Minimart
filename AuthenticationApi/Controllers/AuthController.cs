@@ -1,8 +1,6 @@
 ﻿using AuthenticationApi.Authentications;
-using AuthenticationApi.Service;
 using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
@@ -11,13 +9,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
-using System.Net;
-using System.Security.Claims;
 using System.Text;
 
 namespace AuthenticationApi.Controllers {
     [ApiController]
-    [Route("api/[controller]")]
+    //[Route("api/[controller]")]
     public class AuthController : ControllerBase {
         private readonly UserManager<IdentityUser> userManager;
         private readonly RoleManager<IdentityRole> roleManager;
@@ -51,7 +47,7 @@ namespace AuthenticationApi.Controllers {
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(RegisterRequest request) {
+        public async Task<IActionResult> Register([FromBody] RegisterRequest request) {
             if (!ModelState.IsValid)
                 return ValidationProblem(ModelState);
 
@@ -76,6 +72,8 @@ namespace AuthenticationApi.Controllers {
 
             await userManager.AddToRoleAsync(user, USER_ROLE);
 
+            await userManager.ResetAuthenticatorKeyAsync(user);
+
             //var confirmToken = await userManager.GenerateEmailConfirmationTokenAsync(user);
             //const string confirmEmailUrl = "/confirmEmail";
             //var param = new Dictionary<string, string?>() {
@@ -90,7 +88,7 @@ namespace AuthenticationApi.Controllers {
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login(LoginRequest request) {
+        public async Task<IActionResult> Login([FromBody] LoginRequest request) {
             var user = await userManager.FindByEmailAsync(request.Email);
 
             if (user == null)
@@ -145,48 +143,24 @@ namespace AuthenticationApi.Controllers {
 
         [HttpPost("refresh")]
         public async Task<IActionResult> Refresh(RefreshRequest request) {
-            if (string.IsNullOrWhiteSpace(request.RefreshToken))
-                return BadRequest();
-
-            string userId;
-            try {
-                userId = jwtHandler.ValidateRefreshToken(request.RefreshToken);
-            } catch {
-                return Unauthorized();
-            }
-
-            var user = await userManager.FindByIdAsync(userId);
-
+            var user = await jwtHandler.ValidateRefreshToken(request.RefreshToken);
             if (user == null)
                 return Unauthorized();
 
-            var storedToken = await userManager.GetAuthenticationTokenAsync(
-                user,
-                JwtHandler.LoginProvider,
-                JwtHandler.RefreshTokenName
-            );
-
-            if (storedToken == null || storedToken != request.RefreshToken)
-                return Unauthorized();
-
-            var newAccessToken = await jwtHandler.GenerateAccessToken(user);
+            var accessToken = await jwtHandler.GenerateAccessToken(user);
             var refreshToken = await jwtHandler.GenerateRefreshToken(user);
 
             var response = new AccessTokenResponse {
-                AccessToken = newAccessToken,
+                AccessToken = accessToken,
+                RefreshToken = refreshToken,
                 ExpiresIn = TOKEN_EXPIRY_MINUTES * 60,
-                RefreshToken = refreshToken
             };
 
             return Ok(response);
         }
 
         [HttpGet("confirmEmail")]
-        public async Task<IActionResult> ConfirmEmail(
-            [FromQuery] string userId,
-            [FromQuery] string token,
-            [FromQuery] string? changedEmail = null
-        ) {
+        public async Task<IActionResult> ConfirmEmail(string userId, string token, string? changedEmail = null) {
             if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(token)) {
                 return BadRequest();
             }
@@ -242,9 +216,124 @@ namespace AuthenticationApi.Controllers {
             return Ok();
         }
 
-        [HttpPost("validate")]
-        public IActionResult ValidateToken([Required] string token) {
-            if (string.IsNullOrWhiteSpace(token)) {
+        [HttpPost("forgotPassword")]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordRequest request) {
+            if (string.IsNullOrWhiteSpace(request.Email))
+                return BadRequest("Email is required");
+
+            var user = await userManager.FindByEmailAsync(request.Email);
+
+            if (user == null)
+                return Ok();
+
+            var token = await userManager.GeneratePasswordResetTokenAsync(user);
+
+            var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+
+            //var param = new Dictionary<string, string?>() {
+            //    { "email", request.Email },
+            //    { "resetCode", encodedToken }
+            //};
+
+            //string? callbackUrl = Url.Action(nameof(ResetPassword), "Auth", param, Request.Scheme);
+
+            //await emailService.SendPasswordResetLinkAsync(user, user.Email, callbackUrl);
+            await emailService.SendPasswordResetCodeAsync(user, user.Email, encodedToken);
+
+            return Ok();
+        }
+
+        [HttpPost("resetPassword")]
+        public async Task<IActionResult> ResetPassword(ResetPasswordRequest request) {
+            var user = await userManager.FindByEmailAsync(request.Email);
+            if (user == null)
+                return Ok();
+
+            var decodedBytes = WebEncoders.Base64UrlDecode(request.ResetCode);
+            var resetCode = Encoding.UTF8.GetString(decodedBytes);
+
+            var result = await userManager.ResetPasswordAsync(user, resetCode, request.NewPassword);
+
+            if (!result.Succeeded)
+                return BadRequest(result.Errors);
+
+            await jwtHandler.InvalidateRefreshToken(user);
+
+            return Ok();
+        }
+
+        //TODO: fix workflow
+        //[Authorize]
+        //[HttpPost("manage/2fa")]
+        //public async Task<IActionResult> Manage2Fa(TwoFactorRequest request) {
+        //    var user = await userManager.GetUserAsync(User);
+        //    if (user == null) return NotFound();
+
+        //    var isMachineRemembered = await signInManager.IsTwoFactorClientRememberedAsync(user);
+        //    string? sharedKey = null;
+        //    IEnumerable<string>? recoveryCodes = null;
+
+        //    if (request.Enable == true) {
+        //        if (string.IsNullOrWhiteSpace(request.TwoFactorCode))
+        //            return BadRequest("TwoFactorCode is required when enabling 2FA.");
+
+        //        var verificationCode = request.TwoFactorCode.Replace(" ", "").Replace("-", "");
+
+        //        var isTokenValid = await userManager.VerifyTwoFactorTokenAsync(
+        //            user,
+        //            userManager.Options.Tokens.AuthenticatorTokenProvider,
+        //            verificationCode
+        //        );
+
+        //        if (!isTokenValid)
+        //            return BadRequest("Invalid authenticator code.");
+
+        //        await userManager.SetTwoFactorEnabledAsync(user, true);
+
+        //        var left = await userManager.CountRecoveryCodesAsync(user);
+        //        if (left == 0)
+        //            recoveryCodes = await userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
+        //    }
+
+        //    if (request.Enable == false) {
+        //        await userManager.SetTwoFactorEnabledAsync(user, false);
+        //    }
+
+        //    if (request.ResetSharedKey) {
+        //        await userManager.ResetAuthenticatorKeyAsync(user);
+
+        //        sharedKey = await userManager.GetAuthenticatorKeyAsync(user);
+        //    }
+
+        //    if (request.ResetRecoveryCodes) {
+        //        recoveryCodes = await userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
+        //    }
+
+        //    if (request.ForgetMachine) {
+        //        await signInManager.ForgetTwoFactorClientAsync();
+        //    }
+
+        //    var finalSharedKey = sharedKey ?? await userManager.GetAuthenticatorKeyAsync(user);
+        //    var remainingRecoveryCodes = await userManager.CountRecoveryCodesAsync(user);
+        //    var twoFactorEnabled = await userManager.GetTwoFactorEnabledAsync(user);
+        //    var finalMachineRemembered = !request.ForgetMachine && isMachineRemembered;
+
+        //    return Ok(new TwoFactorResponse {
+        //        SharedKey = finalSharedKey,
+        //        RecoveryCodesLeft = remainingRecoveryCodes,
+        //        RecoveryCodes = recoveryCodes?.ToArray(),
+        //        IsTwoFactorEnabled = twoFactorEnabled,
+        //        IsMachineRemembered = finalMachineRemembered
+        //    });
+        //}
+
+        public class ValidateTokenRequest {
+            public required string Token { get; set; }
+        }
+
+        [HttpPost("validateAccessToken")]
+        public IActionResult ValidateToken([FromBody] ValidateTokenRequest request) {
+            if (string.IsNullOrWhiteSpace(request.Token)) {
                 return BadRequest();
             }
 
@@ -268,7 +357,7 @@ namespace AuthenticationApi.Controllers {
             };
 
             try {
-                var principal = tokenHandler.ValidateToken(token, validationParameters, out SecurityToken validatedToken);
+                var principal = tokenHandler.ValidateToken(request.Token, validationParameters, out SecurityToken validatedToken);
 
                 var jwtToken = validatedToken as JwtSecurityToken;
                 DateTime? expires = jwtToken?.ValidTo;
@@ -311,6 +400,7 @@ namespace AuthenticationApi.Controllers {
             return Ok(result);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("users")]
         public async Task<IActionResult> GetUsers() {
             var users = await userManager.Users.Select(u => u.Email).ToListAsync();

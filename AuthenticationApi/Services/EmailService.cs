@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 using System.Net;
 using System.Net.Mail;
 
-namespace AuthenticationApi.Service {
+namespace AuthenticationApi.Services {
     public class EmailSettings {
         public string Host { get; set; } = "";
         public int Port { get; set; }

@@ -1,6 +1,0 @@
-@MinimartApi_HostAddress = http://localhost:5122
-
-GET {{MinimartApi_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
