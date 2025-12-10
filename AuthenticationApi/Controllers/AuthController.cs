@@ -348,7 +348,7 @@ namespace AuthenticationApi.Controllers {
             public required string Token { get; set; }
         }
 
-        [HttpPost("validateAccessToken")]
+        [HttpPost("validate")]
         public IActionResult ValidateToken([FromBody] ValidateTokenRequest request) {
             if (string.IsNullOrWhiteSpace(request.Token)) {
                 return BadRequest();
