@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OData.Edm;
@@ -35,6 +36,9 @@ builder.Services.AddDbContext<AppDbContext>(option => {
 
 builder.Services.AddJwtConfig(builder.Configuration);
 builder.Services.AddEmailConfig(builder.Configuration);
+builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+builder.Services.AddMemoryCache();
+
 
 builder.Services.AddAuthorization();
 //builder.Services.AddScoped<DataSeeder>();
@@ -81,6 +85,8 @@ builder.Services.AddSwaggerGen(option => {
         }
     });
 });
+
+builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
 var app = builder.Build();
 

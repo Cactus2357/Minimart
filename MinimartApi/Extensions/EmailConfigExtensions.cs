@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using MinimartApi.Models;
 
 namespace MinimartApi.Extensions {
     public static class EmailConfigExtensions {
         public static IServiceCollection AddEmailConfig(this IServiceCollection services, IConfiguration config) {
 
             services.Configure<Services.EmailSettings>(config.GetSection("EmailSettings"));
-            services.AddTransient<IEmailSender<IdentityUser>, Services.EmailService>();
+            services.AddTransient<IEmailSender<User>, Services.EmailService>();
 
             return services;
         }

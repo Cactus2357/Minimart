@@ -12,6 +12,8 @@
         public string Barcode { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public bool IsActive { get; set; }
+        public bool IsDeleted { get; set; } = false;
+        public DateTime? DeletedAt { get; set; }
 
         public virtual Stock? Stock { get; set; }
         public virtual ICollection<SaleItem> SaleItems { get; set; }

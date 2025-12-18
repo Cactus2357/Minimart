@@ -6,7 +6,7 @@
 
         public string Type { get; set; } = string.Empty; // e.g., "IN", "OUT", "ADJUSTMENT"
         public int Quantity { get; set; }
-        public DateTime TransactionDate { get; set; }
+        public DateTime CreatedAt { get; set; }
         public string Reference { get; set; } = string.Empty; // e.g., purchase, sale, adjustment reference
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
+using MinimartApi.Models;
 using System.Net;
 using System.Net.Mail;
 
@@ -13,34 +14,37 @@ namespace MinimartApi.Services {
         public string From { get; set; } = "";
     }
 
-    public class EmailService : IEmailSender<IdentityUser> {
-        public readonly EmailSettings settings;
-        public EmailService(IOptions<EmailSettings> options) {
+    public class EmailService : IEmailSender<User> {
+        private readonly EmailSettings settings;
+        private readonly ILogger<EmailService> logger;
+
+        public EmailService(IOptions<EmailSettings> options, ILogger<EmailService> logger) {
             settings = options.Value;
+            this.logger = logger;
         }
 
-        public async Task SendConfirmationLinkAsync(IdentityUser user, string email, string confirmationLink) {
+        public async Task SendConfirmationLinkAsync(User user, string email, string confirmationLink) {
             string subject = "Confirm your email";
             string body = $"Please confirm your email by clicking the link: <a href=\"{confirmationLink}\">Confirm Email</a>";
 
             await SendEmailAsync(email, subject, body);
         }
 
-        public async Task SendPasswordResetCodeAsync(IdentityUser user, string email, string resetCode) {
+        public async Task SendPasswordResetCodeAsync(User user, string email, string resetCode) {
             string subject = "Reset your password";
             string body = $"Reset your password using this code: <b>{resetCode}</b>";
 
             await SendEmailAsync(email, subject, body);
         }
 
-        public async Task SendPasswordResetLinkAsync(IdentityUser user, string email, string resetLink) {
+        public async Task SendPasswordResetLinkAsync(User user, string email, string resetLink) {
             string subject = "Reset your password";
             string body = $"Reset your password using this link: <a href=\"{resetLink}\">Reset Password</a>";
 
             await SendEmailAsync(email, subject, body);
         }
 
-        public async Task SendEmailAsync(IdentityUser user, string subject, string htmlMessage) {
+        public async Task SendEmailAsync(User user, string subject, string htmlMessage) {
             await SendEmailAsync(user.Email, subject, htmlMessage);
         }
 
@@ -60,6 +64,8 @@ namespace MinimartApi.Services {
             mail.To.Add(toEmail);
 
             await client.SendMailAsync(mail);
+
+            logger.LogInformation($"Sent password reset code to '{toEmail}'.");
         }
     }
 }
