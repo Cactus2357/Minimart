@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -9,6 +10,7 @@ using MinimartApi.Dtos;
 using MinimartApi.Models;
 using MinimartApi.Services;
 using MinimartApi.Utilities;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -68,10 +70,18 @@ namespace MinimartApi.Controllers {
             var username = request.Username.Trim().ToLower();
             var email = request.Email.Trim().ToLowerInvariant();
 
-            var exist = await context.Users.SingleOrDefaultAsync(u => u.Email.ToLower() == email);
-            if (exist != null) {
-                return BadRequest(new { message = $"Email '{email}' is already registered." });
-            }
+            var usernameExists = await context.Users.AnyAsync(u => u.Username.ToLower() == username);
+            var emailExists = await context.Users.AnyAsync(u => u.Email.ToLower() == email);
+
+            if (emailExists == true)
+                ModelState.AddModelError(nameof(request.Email), $"Email '{email}' is already registered.");
+
+            if (usernameExists == true)
+                ModelState.AddModelError(nameof(request.Username), $"Username '{username}' is already taken.");
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
 
             var user = new User {
                 Username = username,
@@ -83,6 +93,13 @@ namespace MinimartApi.Controllers {
             context.Users.Add(user);
 
             //TODO: add Role.User to user
+            var userRole = await context.Roles.SingleOrDefaultAsync(r => r.Name == Role.User);
+            if (userRole != null) {
+                context.UserRoles.Add(new UserRole {
+                    User = user,
+                    Role = userRole
+                });
+            }
 
             await context.SaveChangesAsync();
 
@@ -261,6 +278,41 @@ namespace MinimartApi.Controllers {
             await context.SaveChangesAsync();
 
             return Ok();
+        }
+
+        [HttpGet("me")]
+        [Authorize]
+        public async Task<IActionResult> GetCurrentUserInfo() {
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+            if (userIdClaim == null) {
+                return Unauthorized(new { Message = "User ID claim not found." });
+            }
+            if (!int.TryParse(userIdClaim.Value, out int userId)) {
+                return Unauthorized(new { Message = "Invalid User ID claim." });
+            }
+
+            var user = await context.Users
+            .Include(u => u.UserRoles)
+            .ThenInclude(ur => ur.Role)
+            .Where(u => u.UserId == userId)
+            .Select(u => new UserResponse {
+                UserId = u.UserId,
+                Username = u.Username,
+                Email = u.Email,
+                IsEmailConfirmed = u.IsEmailConfirmed,
+                Roles = u.UserRoles.Select(ur => ur.Role.Name).ToList(),
+                FullName = u.FullName,
+                Address = u.Address,
+                CreatedAt = u.CreatedAt,
+            })
+            .FirstOrDefaultAsync();
+
+            if (user == null) {
+                return NotFound(new { Message = "User not found." });
+            }
+
+            return Ok(user);
+
         }
     }
 }

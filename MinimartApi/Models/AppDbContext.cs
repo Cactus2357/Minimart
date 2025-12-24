@@ -25,6 +25,7 @@ namespace MinimartApi.Models {
             builder.Entity<User>(e => {
                 e.HasIndex(u => u.Email).IsUnique().HasFilter("[IsDeleted] = 0");
                 e.Property(u => u.Email).IsRequired().HasMaxLength(256);
+                e.HasIndex(u => u.Username).IsUnique().HasFilter("[IsDeleted] = 0");
                 e.Property(u => u.Username).IsRequired().HasMaxLength(100);
                 e.Property(u => u.PasswordHash).IsRequired();
                 e.Property(u => u.IsEmailConfirmed).HasDefaultValue(false);

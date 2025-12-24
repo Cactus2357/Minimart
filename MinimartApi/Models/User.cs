@@ -10,8 +10,8 @@ namespace MinimartApi.Models {
         public bool IsEmailConfirmed { get; set; } = false;
         public string? PasswordHash { get; set; } = null;
 
-        public string FullName { get; set; } = string.Empty;
-        public string Address { get; set; } = string.Empty;
+        public string? FullName { get; set; } = string.Empty;
+        public string? Address { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public bool IsDeleted { get; set; } = false;
         public DateTime? DeletedAt { get; set; }
