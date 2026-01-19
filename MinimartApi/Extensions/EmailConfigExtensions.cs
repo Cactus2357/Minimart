@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using MinimartApi.Models;
+using MinimartApi.Db.Models;
 
 namespace MinimartApi.Extensions {
     public static class EmailConfigExtensions {

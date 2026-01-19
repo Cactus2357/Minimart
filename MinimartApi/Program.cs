@@ -5,8 +5,8 @@ using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
 using Microsoft.OpenApi.Models;
 using MinimartApi.Authentications;
+using MinimartApi.Db.Models;
 using MinimartApi.Extensions;
-using MinimartApi.Models;
 
 //static IEdmModel GetEdmModel() {
 //    var builder = new ODataConventionModelBuilder();

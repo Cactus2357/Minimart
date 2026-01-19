@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
-using MinimartApi.Models;
+using MinimartApi.Db.Models;
 using System.Net;
 using System.Net.Mail;
 

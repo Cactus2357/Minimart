@@ -1,19 +1,17 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using MinimartApi.Authentications;
-using MinimartApi.Dtos;
-using MinimartApi.Models;
-using MinimartApi.Services;
+using MinimartApi.Db.Models;
+using MinimartApi.Dtos.Authentication;
+using MinimartApi.Dtos.User;
+using MinimartApi.Enums;
 using MinimartApi.Utilities;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace MinimartApi.Controllers {
     [Route("api/[controller]")]
@@ -64,14 +62,15 @@ namespace MinimartApi.Controllers {
 
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request) {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
             var username = request.Username.Trim().ToLower();
             var email = request.Email.Trim().ToLowerInvariant();
 
-            var usernameExists = await context.Users.AnyAsync(u => u.Username.ToLower() == username);
-            var emailExists = await context.Users.AnyAsync(u => u.Email.ToLower() == email);
+            var usernameExists = await context.Users
+                .IgnoreQueryFilters()
+                .AnyAsync(u => u.Username.ToLower() == username);
+            var emailExists = await context.Users
+                .IgnoreQueryFilters()
+                .AnyAsync(u => u.Email.ToLower() == email);
 
             if (emailExists == true)
                 ModelState.AddModelError(nameof(request.Email), $"Email '{email}' is already registered.");
@@ -93,7 +92,7 @@ namespace MinimartApi.Controllers {
             context.Users.Add(user);
 
             //TODO: add Role.User to user
-            var userRole = await context.Roles.SingleOrDefaultAsync(r => r.Name == Role.User);
+            var userRole = await context.Roles.SingleOrDefaultAsync(r => r.Name.ToLower() == Const.ROLE_CUSTOMER.ToLower());
             if (userRole != null) {
                 context.UserRoles.Add(new UserRole {
                     User = user,
@@ -108,9 +107,6 @@ namespace MinimartApi.Controllers {
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request) {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
             var email = request.Email.Trim().ToLowerInvariant();
 
             var user = await context.Users.SingleOrDefaultAsync(u => u.Email.ToLower() == email);
@@ -135,9 +131,6 @@ namespace MinimartApi.Controllers {
 
         [HttpPost("resend-confirm-email")]
         public async Task<IActionResult> ResendConfirmEmail([FromBody] ResendConfirmEmailRequest request) {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
             var email = request.Email.Trim().ToLowerInvariant();
             var user = await context.Users.SingleOrDefaultAsync(u => u.Email.ToLower() == email);
             if (user == null || user.IsEmailConfirmed)
@@ -160,9 +153,6 @@ namespace MinimartApi.Controllers {
 
         [HttpPost("confirm-email")]
         public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailRequest request) {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
             var email = request.Email.Trim().ToLowerInvariant();
             var providedCode = request.Code.Trim();
 
@@ -198,6 +188,7 @@ namespace MinimartApi.Controllers {
             }
 
             user.IsEmailConfirmed = true;
+            user.UpdatedAt = DateTime.UtcNow;
 
             cache.Remove(confirmCodeKey);
             cache.Remove(confirmAttemptKey);
@@ -208,9 +199,6 @@ namespace MinimartApi.Controllers {
 
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgottPasswordRequest request) {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
             var email = request.Email.Trim().ToLowerInvariant();
 
             var user = await context.Users.SingleOrDefaultAsync(u => u.Email.ToLower() == email);
@@ -234,9 +222,6 @@ namespace MinimartApi.Controllers {
 
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request) {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
             var email = request.Email.Trim().ToLowerInvariant();
             var providedCode = request.Code.Trim();
 
@@ -271,6 +256,7 @@ namespace MinimartApi.Controllers {
             }
 
             user.PasswordHash = passwordHasher.HashPassword(user, request.NewPassword);
+            user.UpdatedAt = DateTime.UtcNow;
 
             cache.Remove(resetCodeKey);
             cache.Remove(attemptKey);
@@ -287,7 +273,7 @@ namespace MinimartApi.Controllers {
             if (userIdClaim == null) {
                 return Unauthorized(new { Message = "User ID claim not found." });
             }
-            if (!int.TryParse(userIdClaim.Value, out int userId)) {
+            if (!Guid.TryParse(userIdClaim.Value, out Guid userId)) {
                 return Unauthorized(new { Message = "Invalid User ID claim." });
             }
 
@@ -296,13 +282,17 @@ namespace MinimartApi.Controllers {
             .ThenInclude(ur => ur.Role)
             .Where(u => u.UserId == userId)
             .Select(u => new UserResponse {
-                UserId = u.UserId,
+                UserId = u.UserId.ToString(),
                 Username = u.Username,
                 Email = u.Email,
                 IsEmailConfirmed = u.IsEmailConfirmed,
                 Roles = u.UserRoles.Select(ur => ur.Role.Name).ToList(),
-                FullName = u.FullName,
-                Address = u.Address,
+                Addresses = u.Addresses.Select(a => new AddressResponse {
+                    ReceiverName = a.ReceiverName,
+                    Phone = a.Phone,
+                    AddressLine = a.AddressLine,
+                    IsDefault = a.IsDefault,
+                }).ToList(),
                 CreatedAt = u.CreatedAt,
             })
             .FirstOrDefaultAsync();
