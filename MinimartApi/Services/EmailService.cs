@@ -1,24 +1,16 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
+using MinimartApi.Configurations;
 using MinimartApi.Db.Models;
 using System.Net;
 using System.Net.Mail;
 
 namespace MinimartApi.Services {
-    public class EmailSettings {
-        public string Host { get; set; } = "";
-        public int Port { get; set; }
-        public bool EnableSSL { get; set; }
-        public string UserName { get; set; } = "";
-        public string Password { get; set; } = "";
-        public string From { get; set; } = "";
-    }
-
     public class EmailService : IEmailSender<User> {
-        private readonly EmailSettings settings;
+        private readonly EmailOptions settings;
         private readonly ILogger<EmailService> logger;
 
-        public EmailService(IOptions<EmailSettings> options, ILogger<EmailService> logger) {
+        public EmailService(IOptions<EmailOptions> options, ILogger<EmailService> logger) {
             settings = options.Value;
             this.logger = logger;
         }

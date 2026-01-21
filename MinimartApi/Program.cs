@@ -1,12 +1,16 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
 using Microsoft.OpenApi.Models;
 using MinimartApi.Authentications;
+using MinimartApi.Configurations;
 using MinimartApi.Db.Models;
 using MinimartApi.Extensions;
+using MinimartApi.Services;
+using Minio;
 
 //static IEdmModel GetEdmModel() {
 //    var builder = new ODataConventionModelBuilder();
@@ -54,6 +58,20 @@ builder.Services.AddScoped<JwtHandler>();
 //       .Count()
 //       .SkipToken();
 //});
+
+builder.Services.Configure<MinioOptions>(builder.Configuration.GetSection("Minio"));
+builder.Services.AddSingleton<IMinioClient>(sp =>
+{
+    var opt = sp.GetRequiredService<IOptions<MinioOptions>>().Value;
+
+    return new MinioClient()
+        .WithEndpoint(opt.Endpoint)
+        .WithCredentials(opt.AccessKey, opt.SecretKey)
+        .WithSSL(opt.UseSSL)
+        .Build();
+});
+
+builder.Services.AddScoped<IFileService, MinioFileService>();
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();

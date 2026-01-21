@@ -2,6 +2,7 @@
     public class ProductResponse {
         public int ProductId { get; set; }
         public string Name { get; set; }
+        public string? ImageUrl { get; set; }
         public string Description { get; set; }
         public List<string>? Categories { get; set; }
         //p.ProductId,

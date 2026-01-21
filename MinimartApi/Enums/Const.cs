@@ -30,5 +30,10 @@
         public const string PRODUCT_STATUS_SUSPENDED = "Suspended";
         public const string PRODUCT_STATUS_ARCHIVED = "Archived";
 
+        // ------------- //
+
+        public const string BUCKET_PRODUCT = "products";
+        public const string BUCKET_PRODUCT_VARIANTS = "variants";
+
     }
 }

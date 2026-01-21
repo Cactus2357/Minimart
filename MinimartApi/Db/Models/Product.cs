@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿    using System.ComponentModel.DataAnnotations;
 
 namespace MinimartApi.Db.Models {
     public class Product {
@@ -9,6 +9,9 @@ namespace MinimartApi.Db.Models {
         public string Name { get; set; }
         
         public string Description { get; set; }
+
+        [Url]
+        public string? ImageUrl { get; set; }
 
         [Required, MaxLength(50)]
         public string Status { get; set; } // Pending, Approved, Rejected

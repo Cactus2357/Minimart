@@ -10,5 +10,8 @@ namespace MinimartApi.Dtos.Product {
 
         [Range(0, int.MaxValue)]
         public int StockQuantity { get; internal set; }
+
+        //[FileExtensions(Extensions = "jpg,jpeg,png,gif,webp", ErrorMessage = "Invalid image format. Allowed formats are jpg, jpeg, png, gif.")]
+        public IFormFile? Image { get; set; }
     }
 }

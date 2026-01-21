@@ -5,6 +5,8 @@ namespace MinimartApi.Dtos.Product {
         [Required, MaxLength(255)]
         public string? VariantName { get; set; }
 
+        public IFormFile? Image { get; set; }
+
         [Required, MaxLength(100)]
         public string? SKU { get; set; }
 
