@@ -1,3 +1,4 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
@@ -8,7 +9,7 @@ using Microsoft.OpenApi.Models;
 using MinimartApi.Authentications;
 using MinimartApi.Configurations;
 using MinimartApi.Db.Models;
-using MinimartApi.Extensions;
+using MinimartApi.Mappers;
 using MinimartApi.Services;
 using Minio;
 
@@ -37,6 +38,9 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<AppDbContext>(option => {
     option.UseSqlServer(connectionString);
 });
+
+var mapperConfig = new MapperConfiguration(mc => mc.AddProfile(new MapperConfig()), new LoggerFactory());
+builder.Services.AddSingleton(mapperConfig.CreateMapper());
 
 builder.Services.AddJwtConfig(builder.Configuration);
 builder.Services.AddEmailConfig(builder.Configuration);
@@ -113,8 +117,7 @@ if (app.Environment.IsDevelopment()) {
     app.MapOpenApi();
     app.UseSwagger();
     app.UseSwaggerUI();
-    app.MapGet("/", () => Results.Redirect("/swagger/index.html"))
-        .ExcludeFromDescription();
+    app.MapGet("/", () => Results.Redirect("/swagger/index.html")).ExcludeFromDescription();
 }
 
 app.UseHttpsRedirection();

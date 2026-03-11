@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using MinimartApi.Services;
 
 namespace MinimartApi.Controllers
@@ -16,6 +17,8 @@ namespace MinimartApi.Controllers
         }
 
         [HttpPost("upload")]
+
+        [EndpointDescription("Test API for file upload")]
         public async Task<IActionResult> UploadFile(IFormFile file)
         {
             if (file == null || file.Length == 0)

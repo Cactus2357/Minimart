@@ -15,7 +15,7 @@ namespace MinimartApi.Db.Models {
         public Address Address { get; set; }
 
         [Required, MaxLength(50)]
-        public OrderStatus CurrentStatus { get; set; }
+        public string CurrentStatus { get; set; }
 
         [Range(0, double.MaxValue)]
         public decimal TotalAmount { get; set; }

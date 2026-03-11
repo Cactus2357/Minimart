@@ -20,7 +20,7 @@ namespace MinimartApi.Db.Models {
         public decimal Amount { get; set; }
 
         [Required, MaxLength(50)]
-        public PaymentStatus Status { get; set; } // e.g., Pending, Completed, Failed, Refunded
+        public string Status { get; set; } // e.g., Pending, Completed, Failed, Refunded
 
         [Required]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

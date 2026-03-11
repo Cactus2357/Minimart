@@ -2,7 +2,7 @@
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
-namespace MinimartApi.Extensions {
+namespace MinimartApi.Configurations {
     public static class JwtConfigExtensions {
         public static IServiceCollection AddJwtConfig(this IServiceCollection services, IConfiguration config) {
 

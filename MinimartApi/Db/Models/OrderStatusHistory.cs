@@ -11,10 +11,10 @@ namespace MinimartApi.Db.Models {
         public Order Order { get; set; }
 
         [Required, MaxLength(50)]
-        public OrderStatus OldStatus { get; set; }
+        public string OldStatus { get; set; }
 
         [Required, MaxLength(50)]
-        public OrderStatus NewStatus { get; set; }
+        public string NewStatus { get; set; }
 
         public Guid? ChangedBy { get; set; }
         public User? Changer { get; set; }

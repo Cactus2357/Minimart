@@ -5,7 +5,7 @@
         Processing = 3,
         Shipped = 4,
         Completed = 5,
-        Cancelled = 6,
+        Canceled = 6,
         Refunded = 7
     }
 }

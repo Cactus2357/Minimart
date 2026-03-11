@@ -1,8 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using MinimartApi.Configurations;
 using MinimartApi.Db.Models;
 
-namespace MinimartApi.Extensions {
+namespace MinimartApi.Configurations {
     public static class EmailConfigExtensions {
         public static IServiceCollection AddEmailConfig(this IServiceCollection services, IConfiguration config) {
 
