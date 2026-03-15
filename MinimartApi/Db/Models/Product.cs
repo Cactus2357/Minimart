@@ -1,13 +1,15 @@
-﻿    using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace MinimartApi.Db.Models {
-    public class Product {
+namespace MinimartApi.Db.Models
+{
+    public class Product
+    {
         [Key]
         public int ProductId { get; set; }
-        
+
         [Required, MaxLength(255)]
         public string Name { get; set; }
-        
+
         public string Description { get; set; }
 
         [Url]

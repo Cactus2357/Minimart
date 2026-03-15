@@ -1,8 +1,9 @@
-﻿using MinimartApi.Enums;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace MinimartApi.Db.Models {
-    public class Payment {
+namespace MinimartApi.Db.Models
+{
+    public class Payment
+    {
         [Key]
         public int PaymentId { get; set; }
 

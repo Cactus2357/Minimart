@@ -1,5 +1,7 @@
-﻿namespace MinimartApi.Dtos.Product {
-    public class ProductResponse {
+﻿namespace MinimartApi.Dtos.Product
+{
+    public class ProductResponse
+    {
         public int ProductId { get; set; }
         public string Name { get; set; }
         public string? ImageUrl { get; set; }

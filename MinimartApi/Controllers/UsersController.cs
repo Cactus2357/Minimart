@@ -7,21 +7,25 @@ using MinimartApi.Dtos.Authentication;
 using MinimartApi.Dtos.User;
 using MinimartApi.Enums;
 
-namespace MinimartApi.Controllers {
+namespace MinimartApi.Controllers
+{
     [Route("api/[controller]")]
     [ApiController]
     [Authorize(Roles = Const.ROLE_ADMIN)]
-    public class UsersController : ControllerBase {
+    public class UsersController : ControllerBase
+    {
         private readonly AppDbContext context;
         private readonly IPasswordHasher<User> passwordHasher;
 
-        public UsersController(AppDbContext context, IPasswordHasher<User> passwordHasher) {
+        public UsersController(AppDbContext context, IPasswordHasher<User> passwordHasher)
+        {
             this.context = context;
             this.passwordHasher = passwordHasher;
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllUsers(bool includeDeleted = false) {
+        public async Task<IActionResult> GetAllUsers(bool includeDeleted = false)
+        {
             var q = context.Users
                 .Include(u => u.UserRoles)
                 .ThenInclude(ur => ur.Role)
@@ -33,13 +37,15 @@ namespace MinimartApi.Controllers {
             //TODO: add pagination
 
             var users = await q
-                .Select(u => new UserResponse {
+                .Select(u => new UserResponse
+                {
                     UserId = u.UserId.ToString(),
                     Username = u.Username,
                     Email = u.Email,
                     IsEmailConfirmed = u.IsEmailConfirmed,
                     Roles = u.UserRoles.Select(ur => ur.Role.Name).ToList(),
-                    Addresses = u.Addresses.Select(a => new AddressResponse {
+                    Addresses = u.Addresses.Select(a => new AddressResponse
+                    {
                         ReceiverName = a.ReceiverName,
                         Phone = a.Phone,
                         AddressLine = a.AddressLine,
@@ -55,12 +61,14 @@ namespace MinimartApi.Controllers {
         //TODO: search user by username or email
 
         [HttpGet("{userId}")]
-        public async Task<IActionResult> GetUserById(Guid userId) {
+        public async Task<IActionResult> GetUserById(Guid userId)
+        {
             var user = await context.Users
                 .Include(u => u.UserRoles)
                 .ThenInclude(ur => ur.Role)
                 .Where(u => u.UserId == userId)
-                .Select(u => new UserResponse {
+                .Select(u => new UserResponse
+                {
                     UserId = u.UserId.ToString(),
                     Username = u.Username,
                     Email = u.Email,
@@ -71,14 +79,16 @@ namespace MinimartApi.Controllers {
                     CreatedAt = u.CreatedAt,
                 })
                 .FirstOrDefaultAsync();
-            if (user == null) {
+            if (user == null)
+            {
                 return NotFound(new { Message = "User not found." });
             }
             return Ok(user);
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateUser([FromBody] UserCreateRequest request) {
+        public async Task<IActionResult> CreateUser([FromBody] UserCreateRequest request)
+        {
             var username = request.Username.Trim().ToLower();
             var email = request.Email.Trim().ToLowerInvariant();
 
@@ -95,7 +105,8 @@ namespace MinimartApi.Controllers {
                 return BadRequest(ModelState);
 
 
-            var user = new User {
+            var user = new User
+            {
                 Username = username,
                 Email = email,
             };
@@ -112,13 +123,16 @@ namespace MinimartApi.Controllers {
         }
 
         [HttpPut("{userId}")]
-        public async Task<IActionResult> UpdateUser(int userId, [FromBody] UserUpdateRequest request) {
+        public async Task<IActionResult> UpdateUser(int userId, [FromBody] UserUpdateRequest request)
+        {
             var user = await context.Users.FindAsync(userId);
-            if (user == null) {
+            if (user == null)
+            {
                 return NotFound(new { Message = "User not found." });
             }
 
-            if (request.Password != null) {
+            if (request.Password != null)
+            {
                 user.PasswordHash = passwordHasher.HashPassword(user, request.Password);
             }
 
@@ -134,10 +148,12 @@ namespace MinimartApi.Controllers {
         }
 
         [HttpDelete("{userId}")]
-        public async Task<IActionResult> DeleteUser(int userId) {
+        public async Task<IActionResult> DeleteUser(int userId)
+        {
             var user = await context.Users.FindAsync(userId);
 
-            if (user == null) {
+            if (user == null)
+            {
                 return NotFound(new { Message = "User not found." });
             }
 
@@ -149,7 +165,8 @@ namespace MinimartApi.Controllers {
         }
 
         [HttpPatch("{userId}/restore")]
-        public async Task<IActionResult> RestoreUser(Guid userId) {
+        public async Task<IActionResult> RestoreUser(Guid userId)
+        {
             var user = await context.Users
                 .IgnoreQueryFilters()
                 .FirstOrDefaultAsync(u => u.UserId == userId && u.IsDeleted);
@@ -179,28 +196,33 @@ namespace MinimartApi.Controllers {
         }
 
         [HttpPut("{userId}/roles")]
-        public async Task<IActionResult> UpdateUserRoles(Guid userId, [FromBody] AssignRoleRequest request) {
+        public async Task<IActionResult> UpdateUserRoles(Guid userId, [FromBody] AssignRoleRequest request)
+        {
             var role = request.Role.Trim().ToLower();
             var user = await context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
 
-            if (user == null) {
+            if (user == null)
+            {
                 return NotFound(new { Message = "User not found." });
             }
 
             var existRole = await context.Roles
                 .FirstOrDefaultAsync(r => r.Name.ToLower() == role);
 
-            if (existRole == null) {
+            if (existRole == null)
+            {
                 ModelState.AddModelError(nameof(request.Role), $"Role '{role}' does not exist.");
                 return BadRequest(ModelState);
             }
 
-            if (await context.UserRoles.AnyAsync(ur => ur.UserId == userId && ur.RoleId == existRole.RoleId)) {
+            if (await context.UserRoles.AnyAsync(ur => ur.UserId == userId && ur.RoleId == existRole.RoleId))
+            {
                 ModelState.AddModelError(nameof(request.Role), $"User already has the role '{role}'.");
                 return BadRequest(ModelState);
             }
 
-            var userRole = new UserRole {
+            var userRole = new UserRole
+            {
                 UserId = userId,
                 RoleId = existRole.RoleId,
             };

@@ -1,8 +1,9 @@
-﻿using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace MinimartApi.Dtos.Authentication {
-    public class RegisterRequest {
+namespace MinimartApi.Dtos.Authentication
+{
+    public class RegisterRequest
+    {
         [Required, StringLength(50, MinimumLength = 3)]
         public required string Username { get; set; }
 

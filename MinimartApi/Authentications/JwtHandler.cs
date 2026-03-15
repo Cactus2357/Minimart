@@ -4,14 +4,16 @@ using MinimartApi.Db.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace MinimartApi.Authentications {
-    public class JwtHandler {
+namespace MinimartApi.Authentications
+{
+    public class JwtHandler
+    {
         private readonly IConfiguration configuration;
         private readonly AppDbContext context;
 
-        public JwtHandler(IConfiguration configuration, AppDbContext context) {
+        public JwtHandler(IConfiguration configuration, AppDbContext context)
+        {
             this.configuration = configuration;
             this.context = context;
 
@@ -23,7 +25,8 @@ namespace MinimartApi.Authentications {
                 throw new InvalidOperationException("JWT signing key must be at least 32 characters (256 bits) for HS256.");
         }
 
-        public async Task<string> GenerateAccessToken(User user, IList<Claim>? additionalClaims = null) {
+        public async Task<string> GenerateAccessToken(User user, IList<Claim>? additionalClaims = null)
+        {
             var userRoles = await context.UserRoles
                 .Where(ur => ur.UserId == user.UserId)
                 .Select(ur => ur.Role.Name)

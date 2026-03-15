@@ -1,5 +1,7 @@
-﻿namespace MinimartApi.Enums {
-    public enum OrderStatus {
+﻿namespace MinimartApi.Enums
+{
+    public enum OrderStatus
+    {
         Pending = 1,
         Paid = 2,
         Processing = 3,

@@ -1,8 +1,9 @@
-﻿using MinimartApi.Enums;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace MinimartApi.Db.Models {
-    public class OrderStatusHistory {
+namespace MinimartApi.Db.Models
+{
+    public class OrderStatusHistory
+    {
         [Key]
         public int HistoryId { get; set; }
 

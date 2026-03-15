@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace MinimartApi.Dtos.Product {
-    public class ProductVariantUpdateRequest {
+namespace MinimartApi.Dtos.Product
+{
+    public class ProductVariantUpdateRequest
+    {
         [Required, MaxLength(255)]
         public string? VariantName { get; set; }
 

@@ -1,7 +1,9 @@
 ﻿using MinimartApi.Dtos.Authentication;
 
-namespace MinimartApi.Dtos.User {
-    public class UserResponse {
+namespace MinimartApi.Dtos.User
+{
+    public class UserResponse
+    {
         public string UserId { get; set; }
         public string Username { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;

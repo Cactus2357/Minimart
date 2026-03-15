@@ -1,10 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using MinimartApi.Enums;
-using System.Reflection.Emit;
 
-namespace MinimartApi.Db.Models {
-    public class AppDbContext : DbContext {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) {
+namespace MinimartApi.Db.Models
+{
+    public class AppDbContext : DbContext
+    {
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+        {
         }
 
         public DbSet<User> Users { get; set; }
@@ -20,20 +21,24 @@ namespace MinimartApi.Db.Models {
         public DbSet<OrderStatusHistory> OrderStatusHistories { get; set; }
         public DbSet<Payment> Payments { get; set; }
 
-        protected override void OnModelCreating(ModelBuilder builder) {
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
             base.OnModelCreating(builder);
 
-            builder.Entity<User>(e => {
+            builder.Entity<User>(e =>
+            {
                 e.HasIndex(u => u.Email).IsUnique();
                 e.HasIndex(u => u.Username).IsUnique();
                 e.HasQueryFilter(u => !u.IsDeleted);
             });
 
-            builder.Entity<Role>(e => {
+            builder.Entity<Role>(e =>
+            {
                 e.HasIndex(r => r.Name).IsUnique();
             });
 
-            builder.Entity<UserRole>(e => {
+            builder.Entity<UserRole>(e =>
+            {
                 e.HasKey(ur => new { ur.UserId, ur.RoleId });
                 e.HasOne(ur => ur.User)
                 .WithMany(u => u.UserRoles)
@@ -45,7 +50,8 @@ namespace MinimartApi.Db.Models {
                 .OnDelete(DeleteBehavior.Restrict);
             });
 
-            builder.Entity<Address>(e => {
+            builder.Entity<Address>(e =>
+            {
                 e.HasOne(a => a.User)
                 .WithMany(u => u.Addresses)
                 .HasForeignKey(a => a.UserId)
@@ -53,7 +59,8 @@ namespace MinimartApi.Db.Models {
                 .IsRequired();
             });
 
-            builder.Entity<Category>(e => {
+            builder.Entity<Category>(e =>
+            {
                 e.HasOne(c => c.ParentCategory)
                 .WithMany(c => c.Children)
                 .HasForeignKey(c => c.ParentCategoryId)
@@ -65,7 +72,8 @@ namespace MinimartApi.Db.Models {
                 .OnDelete(DeleteBehavior.Restrict);
             });
 
-            builder.Entity<Product>(e => {
+            builder.Entity<Product>(e =>
+            {
                 e.HasQueryFilter(p => !p.IsDeleted);
                 e.Property(p => p.Status)
                 .HasMaxLength(50)
@@ -76,7 +84,8 @@ namespace MinimartApi.Db.Models {
                 .OnDelete(DeleteBehavior.Restrict);
             });
 
-            builder.Entity<ProductCategory>(e => {
+            builder.Entity<ProductCategory>(e =>
+            {
                 e.HasKey(pc => new { pc.ProductId, pc.CategoryId });
                 e.HasOne(pc => pc.Product)
                 .WithMany(p => p.ProductCategories)
@@ -88,7 +97,8 @@ namespace MinimartApi.Db.Models {
                 .OnDelete(DeleteBehavior.Restrict);
             });
 
-            builder.Entity<ProductVariant>(e => {
+            builder.Entity<ProductVariant>(e =>
+            {
                 e.HasIndex(v => v.SKU).IsUnique();
                 e.Property(v => v.Stock).HasDefaultValue(0);
                 e.HasOne(v => v.Product)
@@ -97,7 +107,8 @@ namespace MinimartApi.Db.Models {
                 .OnDelete(DeleteBehavior.Cascade);
             });
 
-            builder.Entity<PriceHistory>(e => {
+            builder.Entity<PriceHistory>(e =>
+            {
                 e.Property(p => p.OriginalPrice).HasPrecision(18, 2);
                 e.Property(p => p.SalePrice).HasPrecision(18, 2);
                 e.HasOne(ph => ph.ProductVariant)
@@ -111,7 +122,8 @@ namespace MinimartApi.Db.Models {
                 e.HasIndex(p => new { p.VariantId, p.EffectiveFrom, p.EffectiveTo });
             });
 
-            builder.Entity<Order>(e => {
+            builder.Entity<Order>(e =>
+            {
                 e.Property(o => o.CurrentStatus)
                 .HasConversion<string>()
                 .HasMaxLength(50)
@@ -124,7 +136,8 @@ namespace MinimartApi.Db.Models {
                 .OnDelete(DeleteBehavior.Restrict);
             });
 
-            builder.Entity<OrderItem>(e => {
+            builder.Entity<OrderItem>(e =>
+            {
                 e.Property(o => o.UnitPrice).HasPrecision(18, 2);
                 e.HasIndex(oi => new { oi.OrderId, oi.VariantId });
                 e.HasOne(oi => oi.Order)
@@ -137,7 +150,8 @@ namespace MinimartApi.Db.Models {
                 .OnDelete(DeleteBehavior.Restrict);
             });
 
-            builder.Entity<OrderStatusHistory>(e => {
+            builder.Entity<OrderStatusHistory>(e =>
+            {
                 e.Property(h => h.OldStatus)
                 .HasConversion<string>()
                 .HasMaxLength(50);
@@ -154,7 +168,8 @@ namespace MinimartApi.Db.Models {
                 .OnDelete(DeleteBehavior.Restrict);
             });
 
-            builder.Entity<Payment>(e => {
+            builder.Entity<Payment>(e =>
+            {
                 e.HasIndex(p => p.OrderId).IsUnique();
                 e.Property(p => p.Amount).HasPrecision(18, 2);
                 e.Property(p => p.Status)

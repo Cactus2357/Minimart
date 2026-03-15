@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace MinimartApi.Db.Models {
-    public class PriceHistory {
+namespace MinimartApi.Db.Models
+{
+    public class PriceHistory
+    {
         [Key]
         public int PriceHistoryId { get; set; }
 

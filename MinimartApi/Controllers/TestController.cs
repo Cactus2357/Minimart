@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.RateLimiting;
+﻿using Microsoft.AspNetCore.Mvc;
 using MinimartApi.Services;
 
 namespace MinimartApi.Controllers

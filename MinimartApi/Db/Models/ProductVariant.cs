@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace MinimartApi.Db.Models {
-    public class ProductVariant {
+namespace MinimartApi.Db.Models
+{
+    public class ProductVariant
+    {
         [Key]
         public int VariantId { get; set; }
 

@@ -2,17 +2,23 @@
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
-namespace MinimartApi.Configurations {
-    public static class JwtConfigExtensions {
-        public static IServiceCollection AddJwtConfig(this IServiceCollection services, IConfiguration config) {
+namespace MinimartApi.Configurations
+{
+    public static class JwtConfigExtensions
+    {
+        public static IServiceCollection AddJwtConfig(this IServiceCollection services, IConfiguration config)
+        {
 
             services
-                .AddAuthentication(option => {
+                .AddAuthentication(option =>
+                {
                     option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                     option.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
                 })
-                .AddJwtBearer(options => {
-                    options.TokenValidationParameters = new TokenValidationParameters {
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
                         ValidateIssuer = true,
                         ValidateAudience = true,
                         ValidateLifetime = true,

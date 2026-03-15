@@ -1,6 +1,4 @@
-﻿using MinimartApi.Enums;
-
-namespace MinimartApi.Dtos.Order
+﻿namespace MinimartApi.Dtos.Order
 {
     public class OrderStatusUpdateRequest
     {

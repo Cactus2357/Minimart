@@ -1,5 +1,7 @@
-﻿namespace MinimartApi.Enums {
-    public class Const {
+﻿namespace MinimartApi.Enums
+{
+    public class Const
+    {
         public const string ROLE_ADMIN = "Admin";
         public const string ROLE_STAFF = "Staff";
         public const string ROLE_CUSTOMER = "Customer";

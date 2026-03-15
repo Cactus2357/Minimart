@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace MinimartApi.Dtos.Product {
-    public class PriceRequest {
+namespace MinimartApi.Dtos.Product
+{
+    public class PriceRequest
+    {
         [Range(0, double.MaxValue)]
         public decimal? SalePrice { get; internal set; }
 

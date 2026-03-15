@@ -1,6 +1,4 @@
-﻿using MinimartApi.Db.Models;
-
-namespace MinimartApi.Services
+﻿namespace MinimartApi.Services
 {
     public interface IFileService
     {

@@ -1,10 +1,10 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace MinimartApi.Db.Models {
+namespace MinimartApi.Db.Models
+{
 
-    public class User {
+    public class User
+    {
         [Key]
         public Guid UserId { get; set; }
 
