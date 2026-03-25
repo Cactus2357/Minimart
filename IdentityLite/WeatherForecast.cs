@@ -1,5 +1,7 @@
-namespace IdentityLite {
-    public class WeatherForecast {
+namespace IdentityLite
+{
+    public class WeatherForecast
+    {
         public DateOnly Date { get; set; }
 
         public int TemperatureC { get; set; }
